@@ -1,20 +1,22 @@
 package com.hexaware.assetmanagement.dto;
 
 public class UserDetailsDTO {
+	private int id;
     private String name;
     private String email;
     private String contactNumber;
     private String department;
     private String role;
-
+    
     // Only for employees
     private String designation;
     private String joinDate;
 
     public UserDetailsDTO() {}
 
-    public UserDetailsDTO(String name, String email, String contactNumber,
+    public UserDetailsDTO(int id,String name, String email, String contactNumber,
                           String department, String role, String designation, String joinDate) {
+    	this.id=id;
         this.name = name;
         this.email = email;
         this.contactNumber = contactNumber;
@@ -78,6 +80,16 @@ public class UserDetailsDTO {
 
 	public void setJoinDate(String joinDate) {
 		this.joinDate = joinDate;
+	}
+	
+	public int getId()
+	{
+		return id;
+	}
+	
+	public void setId(int id)
+	{
+		this.id=id;
 	}
 
     // Getters & Setters

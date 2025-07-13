@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import com.hexaware.assetmanagement.dto.AssetDTO;
 import com.hexaware.assetmanagement.serviceimpl.AssetService;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/assets")
 public class AssetController {

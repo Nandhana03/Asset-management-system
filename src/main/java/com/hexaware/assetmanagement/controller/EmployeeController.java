@@ -16,6 +16,7 @@ import com.hexaware.assetmanagement.serviceimpl.AssetService;
 import com.hexaware.assetmanagement.serviceimpl.EmployeeService;
 import com.hexaware.assetmanagement.serviceimpl.ServiceRequestService;
 
+@CrossOrigin(origins = "*")
 @RestController
 public class EmployeeController {
 

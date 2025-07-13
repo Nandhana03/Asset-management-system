@@ -24,6 +24,7 @@ public class UserService {
         if (creds.getRole() == UserRole.ADMIN) {
             Admin admin = creds.getAdmin();
             return new UserDetailsDTO(
+            	admin.getId(),
                 admin.getName(),
                 admin.getEmail(),
                 admin.getContactNumber(),
@@ -35,6 +36,7 @@ public class UserService {
         } else {
             Employee emp = creds.getEmployee();
             return new UserDetailsDTO(
+            	emp.getId(),
                 emp.getName(),
                 emp.getEmail(),
                 emp.getContactNumber(),

@@ -13,6 +13,7 @@ import com.hexaware.assetmanagement.dto.DashboardStatsDTO;
 import com.hexaware.assetmanagement.dto.EmployeeResponseDTO;
 import com.hexaware.assetmanagement.serviceimpl.AdminService;
 
+@CrossOrigin(origins = "*")
 @RestController
 public class AdminController {
 

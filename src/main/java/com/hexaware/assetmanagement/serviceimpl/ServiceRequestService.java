@@ -2,6 +2,7 @@ package com.hexaware.assetmanagement.serviceimpl;
 
 import com.hexaware.assetmanagement.dto.ServiceRequestDTO;
 import com.hexaware.assetmanagement.entity.*;
+import com.hexaware.assetmanagement.enums.AssetStatus;
 import com.hexaware.assetmanagement.enums.IssueType;
 import com.hexaware.assetmanagement.enums.ServiceStatus;
 import com.hexaware.assetmanagement.exception.ResourceNotFoundException;
@@ -58,6 +59,8 @@ public class ServiceRequestService {
         request.setRequestDate(dto.getRequestDate());
         request.setEmployee(emp);
         request.setAsset(asset);
+        asset.setStatus(AssetStatus.REQUESTED);  // <-- this line is the key
+        assetRepo.save(asset); 
 
         return ServiceRequestMapper.toDTO(requestRepo.save(request));
     }

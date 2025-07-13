@@ -2,6 +2,8 @@ package com.hexaware.assetmanagement.dto;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class ServiceRequestDTO {
 
     private int id;
@@ -9,6 +11,7 @@ public class ServiceRequestDTO {
  // and then check if there any requirement for service request request type controller is reqd for admin side filteration to get the details of teh requested assets(must be handled via service request, added here as a side note)
     private String description;
     private String status;           // PENDING, APPROVED, RESOLVED
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate requestDate;
 
     private int assetId;             // Reference to asset
