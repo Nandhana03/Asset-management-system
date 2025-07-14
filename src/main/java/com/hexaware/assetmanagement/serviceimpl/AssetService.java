@@ -70,13 +70,61 @@ public class AssetService {
     }
 
     // UPDATE asset
+//    public AssetDTO updateAsset(int id, AssetDTO dto) {
+//        Asset existing = repo.findById(id)
+//                .orElseThrow(() -> new ResourceNotFoundException("Asset not found with id: " + id));
+//
+//        existing.setName(dto.getName());
+//        existing.setAssetNumber(dto.getAssetNumber());
+//
+//        if (dto.getStatus() != null) {
+//            try {
+//                existing.setStatus(AssetStatus.valueOf(dto.getStatus().toUpperCase()));
+//            } catch (IllegalArgumentException e) {
+//                throw new InvalidInputException("Invalid asset status: " + dto.getStatus());
+//            }
+//        }
+//
+//        if (dto.getAssetCondition() != null) {
+//            try {
+//                existing.setAssetCondition(AssetCondition.valueOf(dto.getAssetCondition().toUpperCase()));
+//            } catch (IllegalArgumentException e) {
+//                throw new InvalidInputException("Invalid asset condition: " + dto.getAssetCondition());
+//            }
+//        }
+//
+//        existing.setPurchasedDate(dto.getPurchasedDate());
+//
+//        // Update category if provided
+//        if (dto.getCategoryName() != null) {
+//            Category category = categoryRepo.findByName(dto.getCategoryName());
+//            if (category == null) {
+//                throw new ResourceNotFoundException("Category not found: " + dto.getCategoryName());
+//            }
+//            existing.setCategory(category);
+//        }
+//
+//        // Update assignedTo if provided
+//        if (dto.getAssignedToName() != null) {
+//            Employee assignedTo = employeeRepo.findByName(dto.getAssignedToName());
+//            if (assignedTo == null) {
+//                throw new ResourceNotFoundException("Assigned employee not found: " + dto.getAssignedToName());
+//            }
+//            existing.setAssignedTo(assignedTo);
+//        }
+//
+//        return AssetMapper.toDTO(repo.save(existing));
+//    }
+      
     public AssetDTO updateAsset(int id, AssetDTO dto) {
         Asset existing = repo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Asset not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Asset not found with id: " + id));
 
+        // Update basic fields
         existing.setName(dto.getName());
         existing.setAssetNumber(dto.getAssetNumber());
 
+        // Update status if valid
         if (dto.getStatus() != null) {
             try {
                 existing.setStatus(AssetStatus.valueOf(dto.getStatus().toUpperCase()));
@@ -85,6 +133,7 @@ public class AssetService {
             }
         }
 
+        // Update asset condition if valid
         if (dto.getAssetCondition() != null) {
             try {
                 existing.setAssetCondition(AssetCondition.valueOf(dto.getAssetCondition().toUpperCase()));
@@ -93,7 +142,10 @@ public class AssetService {
             }
         }
 
-        existing.setPurchasedDate(dto.getPurchasedDate());
+        // Update purchase date
+        if (dto.getPurchasedDate() != null) {
+            existing.setPurchasedDate(dto.getPurchasedDate());
+        }
 
         // Update category if provided
         if (dto.getCategoryName() != null) {
@@ -104,8 +156,16 @@ public class AssetService {
             existing.setCategory(category);
         }
 
-        // Update assignedTo if provided
-        if (dto.getAssignedToName() != null) {
+        // ✅ Update assignedTo using assignedToId (preferred)
+        if (dto.getAssignedToId() != 0) {
+            Optional<Employee> assignedToOpt = employeeRepo.findById(dto.getAssignedToId());
+            if (assignedToOpt.isEmpty()) {
+                throw new ResourceNotFoundException("Assigned employee not found with ID: " + dto.getAssignedToId());
+            }
+            existing.setAssignedTo(assignedToOpt.get());
+
+        // Fallback: update using name if ID not given
+        } else if (dto.getAssignedToName() != null && !dto.getAssignedToName().isEmpty()) {
             Employee assignedTo = employeeRepo.findByName(dto.getAssignedToName());
             if (assignedTo == null) {
                 throw new ResourceNotFoundException("Assigned employee not found: " + dto.getAssignedToName());
@@ -113,7 +173,9 @@ public class AssetService {
             existing.setAssignedTo(assignedTo);
         }
 
-        return AssetMapper.toDTO(repo.save(existing));
+        // Save and return updated asset
+        Asset updated = repo.save(existing);
+        return AssetMapper.toDTO(updated);
     }
 
     // DELETE asset

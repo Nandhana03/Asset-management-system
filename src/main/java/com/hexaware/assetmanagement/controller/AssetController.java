@@ -29,7 +29,7 @@ public class AssetController {
     @GetMapping("/{id}")
     public ResponseEntity<AssetDTO> getAssetById(@PathVariable int id) {
         AssetDTO dto = service.getAssetById(id);
-        return dto != null ? new ResponseEntity<>(dto, HttpStatus.FOUND) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return dto != null ? new ResponseEntity<>(dto, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     // ✅ Restricted to ADMIN only
