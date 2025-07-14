@@ -44,7 +44,7 @@ public class AuditRequestController {
     }
 
     // GET /api/audit/user/{uid} - logs for a specific user
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @GetMapping("/user/{uid}")
     public ResponseEntity<List<AuditRequestDTO>> getLogsByEmployee(@PathVariable int uid) {
         List<AuditRequestDTO> logs = service.getLogsByEmployee(uid);

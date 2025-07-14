@@ -78,7 +78,7 @@ public class AssetController {
     }
     
     //newly added  --> assigned assets
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN')")
     @GetMapping("/assigned/{employeeId}")
     public ResponseEntity<List<AssetDTO>> getAssignedAssets(@PathVariable int employeeId) {
         List<AssetDTO> assets = service.getAssetsAssignedToEmployee(employeeId);

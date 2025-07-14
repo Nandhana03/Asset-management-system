@@ -18,6 +18,7 @@ import com.hexaware.assetmanagement.serviceimpl.ServiceRequestService;
 
 @CrossOrigin(origins = "*")
 @RestController
+@RequestMapping("/api")
 public class EmployeeController {
 
     @Autowired
