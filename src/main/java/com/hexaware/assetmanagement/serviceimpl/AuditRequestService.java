@@ -18,6 +18,67 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+//
+//@Service
+//public class AuditRequestService {
+//
+//    @Autowired
+//    private AuditRequestRepository auditRepo;
+//
+//    @Autowired
+//    private EmployeeRepository employeeRepo;
+//
+//    @Autowired
+//    private AssetRepository assetRepo;
+//
+//    // Get all audit logs
+//    public List<AuditRequestDTO> getAllLogs() {
+//        List<AuditRequest> logs = auditRepo.findAll();
+//        return logs.stream()
+//                   .map(AuditRequestMapper::toDTO)
+//                   .collect(Collectors.toList());
+//    }
+//
+//    // Get single audit log by ID
+//    public AuditRequestDTO getLogById(int id) {
+//        return auditRepo.findById(id)
+//                        .map(AuditRequestMapper::toDTO)
+//                        .orElseThrow(() -> new ResourceNotFoundException("Audit log not found with id: " + id));
+//    }
+//
+//    // Get logs by employee ID
+//    public List<AuditRequestDTO> getLogsByEmployee(int employeeId) {
+//        return auditRepo.findByEmployeeId(employeeId)
+//                        .stream()
+//                        .map(AuditRequestMapper::toDTO)
+//                        .collect(Collectors.toList());
+//    }
+//
+//    // Get logs by date
+//    public List<AuditRequestDTO> getLogsByDate(LocalDate date) {
+//        return auditRepo.findByAuditDateBetween(
+//                date.atStartOfDay(),
+//                date.plusDays(1).atStartOfDay()
+//        ).stream()
+//         .map(AuditRequestMapper::toDTO)
+//         .collect(Collectors.toList());
+//    }
+//
+//    // Add a new audit entry
+//    public AuditRequestDTO addAudit(AuditRequestDTO dto) {
+//        Employee emp = employeeRepo.findById(dto.getEmployeeId())
+//                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + dto.getEmployeeId()));
+//
+//        Asset asset = assetRepo.findById(dto.getAssetId())
+//                .orElseThrow(() -> new ResourceNotFoundException("Asset not found with id: " + dto.getAssetId()));
+//
+//        AuditRequest entity = AuditRequestMapper.toEntity(dto, emp, asset);
+//        entity.setAuditDate(LocalDateTime.now());
+//
+//        AuditRequest saved = auditRepo.save(entity);
+//        return AuditRequestMapper.toDTO(saved);
+//    }
+//}
 
 @Service
 public class AuditRequestService {
@@ -31,51 +92,58 @@ public class AuditRequestService {
     @Autowired
     private AssetRepository assetRepo;
 
-    // Get all audit logs
-    public List<AuditRequestDTO> getAllLogs() {
-        List<AuditRequest> logs = auditRepo.findAll();
-        return logs.stream()
-                   .map(AuditRequestMapper::toDTO)
-                   .collect(Collectors.toList());
-    }
-
-    // Get single audit log by ID
-    public AuditRequestDTO getLogById(int id) {
-        return auditRepo.findById(id)
-                        .map(AuditRequestMapper::toDTO)
-                        .orElseThrow(() -> new ResourceNotFoundException("Audit log not found with id: " + id));
-    }
-
-    // Get logs by employee ID
-    public List<AuditRequestDTO> getLogsByEmployee(int employeeId) {
-        return auditRepo.findByEmployeeId(employeeId)
-                        .stream()
-                        .map(AuditRequestMapper::toDTO)
-                        .collect(Collectors.toList());
-    }
-
-    // Get logs by date
-    public List<AuditRequestDTO> getLogsByDate(LocalDate date) {
-        return auditRepo.findByAuditDateBetween(
-                date.atStartOfDay(),
-                date.plusDays(1).atStartOfDay()
-        ).stream()
-         .map(AuditRequestMapper::toDTO)
-         .collect(Collectors.toList());
-    }
-
-    // Add a new audit entry
-    public AuditRequestDTO addAudit(AuditRequestDTO dto) {
+    // ADMIN: Create audit request
+    public AuditRequestDTO createRequestFromAdmin(AuditRequestDTO dto) {
         Employee emp = employeeRepo.findById(dto.getEmployeeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + dto.getEmployeeId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found: " + dto.getEmployeeId()));
 
         Asset asset = assetRepo.findById(dto.getAssetId())
-                .orElseThrow(() -> new ResourceNotFoundException("Asset not found with id: " + dto.getAssetId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Asset not found: " + dto.getAssetId()));
 
-        AuditRequest entity = AuditRequestMapper.toEntity(dto, emp, asset);
+        AuditRequest entity = new AuditRequest();
+        entity.setStatus("PENDING");
+        entity.setAction("PENDING");
+        entity.setPerformedBy(dto.getPerformedBy()); // Admin
+        entity.setAuditDescrption(dto.getAuditDescrption());
         entity.setAuditDate(LocalDateTime.now());
+        entity.setAdminNote(dto.getAuditDescrption());
+        entity.setEmployee(emp);
+        entity.setAsset(asset);
 
-        AuditRequest saved = auditRepo.save(entity);
-        return AuditRequestMapper.toDTO(saved);
+        return AuditRequestMapper.toDTO(auditRepo.save(entity));
+    }
+
+    // EMPLOYEE: Respond to audit
+    public AuditRequestDTO respondToAuditRequest(int id, AuditRequestDTO dto) {
+        AuditRequest entity = auditRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Audit request not found with id: " + id));
+
+        entity.setAction(dto.getAction());
+        entity.setStatus(dto.getAction().toUpperCase()); // VERIFIED or REJECTED
+        entity.setPerformedBy(dto.getPerformedBy());
+        entity.setAuditDescrption(dto.getAuditDescrption());
+        entity.setAuditDate(LocalDateTime.now());
+        entity.setEmployeeResponse(dto.getAuditDescrption());
+
+        return AuditRequestMapper.toDTO(auditRepo.save(entity));
+    }
+
+    public List<AuditRequestDTO> getAllLogs() {
+        return auditRepo.findAll().stream().map(AuditRequestMapper::toDTO).collect(Collectors.toList());
+    }
+
+    public AuditRequestDTO getLogById(int id) {
+        return auditRepo.findById(id).map(AuditRequestMapper::toDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("Audit log not found with id: " + id));
+    }
+
+    public List<AuditRequestDTO> getLogsByEmployee(int employeeId) {
+        return auditRepo.findByEmployeeId(employeeId).stream().map(AuditRequestMapper::toDTO).collect(Collectors.toList());
+    }
+
+    public List<AuditRequestDTO> getLogsByDate(LocalDate date) {
+        return auditRepo.findByAuditDateBetween(
+                date.atStartOfDay(), date.plusDays(1).atStartOfDay())
+                .stream().map(AuditRequestMapper::toDTO).collect(Collectors.toList());
     }
 }
